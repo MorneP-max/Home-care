@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A simple family home-maintenance and cleaning tracker for your phone.">
+<meta name="theme-color" content="#4f7a5f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Home Care">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Home Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#f6f3ec; --card:#fffdf8; --ink:#23302a; --muted:#6b756f; --line:#e6e0d3;
+  --sage:#4f7a5f; --sage-d:#3b5f49; --sage-l:#e3ede5;
+  --clay:#c4663f; --clay-l:#f8e4d9; --sun:#d9a526; --sun-l:#fbf0d2;
+  --sky:#3f74a8; --sky-l:#e0eaf4; --plum:#7a5a8c; --plum-l:#ece3f1;
+  --r:16px; --shadow:0 1px 2px rgba(35,48,42,.06),0 4px 14px rgba(35,48,42,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito Sans",system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.4}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 96px)}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:4px 0 14px}
+h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:28px;line-height:1.05;margin:0;letter-spacing:-.01em}
+h1 small{display:block;font-family:"Nunito Sans",sans-serif;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0;margin-bottom:4px}
+h2{font-family:Fraunces,Georgia,serif;font-size:19px;margin:22px 2px 10px;font-weight:600}
+h2 .count{font-family:"Nunito Sans",sans-serif;font-size:13px;color:var(--muted);font-weight:700;margin-left:6px}
+.me{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.me select{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;text-transform:none;letter-spacing:0;color:var(--ink)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.stat{padding:12px 10px;text-align:center}
+.stat b{display:block;font-family:Fraunces,serif;font-size:26px;line-height:1}
+.stat span{font-size:12px;color:var(--muted);font-weight:700}
+.stat.over b{color:var(--clay)} .stat.soon b{color:var(--sun)} .stat.ok b{color:var(--sage)}
+.robot{padding:14px 14px 10px;margin-top:12px;background:linear-gradient(135deg,#eaf1fa,#f4f8fc);border-color:#d3e0ee}
+.robot .rh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.robot .rh svg{flex:none}
+.robot .rh b{font-size:16px}
+.robot .rh span{display:block;font-size:13px;color:var(--muted)}
+.days{display:flex;gap:6px;margin:8px 0 6px}
+.days i{font-style:normal;flex:1;text-align:center;font-size:12px;font-weight:800;padding:6px 0;border-radius:10px;background:#fff;color:var(--muted);border:1px solid #d9e3ee}
+.days i.on{background:var(--sky);color:#fff;border-color:var(--sky)}
+.days i.today{outline:2px solid var(--ink);outline-offset:1px}
+.chk{display:flex;align-items:flex-start;gap:10px;padding:9px 2px;border-top:1px dashed #d3e0ee;font-size:15px}
+.chk:first-of-type{border-top:0}
+.chk input{width:22px;height:22px;accent-color:var(--sky);flex:none;margin:0}
+.chk.done span{color:var(--muted);text-decoration:line-through}
+.sub{font-size:12px;font-weight:800;color:var(--sky);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 2px}
+.list{display:flex;flex-direction:column;gap:8px}
+.task{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;position:relative;overflow:hidden}
+.task::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--line)}
+.task.over::before{background:var(--clay)} .task.soon::before{background:var(--sun)} .task.ok::before{background:var(--sage)}
+.task .body{flex:1;min-width:0}
+.task .name{font-weight:700;font-size:15.5px;line-height:1.25}
+.task .meta{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:5px;font-size:12.5px;color:var(--muted);align-items:center}
+.pill{font-size:11.5px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--sage-l);color:var(--sage-d);white-space:nowrap}
+.pill.f-w{background:var(--sage-l);color:var(--sage-d)} .pill.f-m{background:var(--sky-l);color:var(--sky)}
+.pill.f-q{background:var(--sun-l);color:#8a6510} .pill.f-h{background:var(--plum-l);color:var(--plum)}
+.pill.f-y{background:var(--clay-l);color:#9a4726} .pill.f-ym{background:#e7e3da;color:#5a5243}
+.pill.who{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.due.over{color:var(--clay);font-weight:800} .due.soon{color:#a67b0c;font-weight:800}
+.tick{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--sage);background:#fff;display:grid;place-items:center;transition:transform .12s}
+.tick:active{transform:scale(.92)}
+.tick svg{opacity:.35}
+.tick.justdone{background:var(--sage)} .tick.justdone svg{opacity:1;stroke:#fff}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;color:var(--muted)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.area{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 4px 6px}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:14px}
+.note{font-size:13px;color:var(--muted);padding:12px 14px;line-height:1.45}
+.note b{color:var(--ink)}
+.intro{padding:14px;font-size:14px;color:var(--ink);line-height:1.5;margin-bottom:4px;background:var(--sage-l);border-color:#cfdfd3}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(env(safe-area-inset-bottom) + 6px);z-index:10}
+nav.tabs .in{display:flex;max-width:560px;width:100%}
+nav.tabs a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11.5px;font-weight:800;color:var(--muted);text-decoration:none;border-radius:12px}
+nav.tabs a.on{color:var(--sage-d);background:var(--sage-l)}
+nav.tabs svg{width:24px;height:24px}
+.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--clay);color:#fff;font-size:11px;line-height:18px;text-align:center;margin-left:3px}
+.sheet-bg{position:fixed;inset:0;background:rgba(20,28,24,.4);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 18px);max-height:86vh;overflow-y:auto;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-family:Fraunces,serif;font-size:22px;margin:4px 0 8px;line-height:1.15}
+.sheet .tip{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.5;margin:10px 0}
+.field{display:flex;flex-direction:column;gap:5px;margin:12px 0}
+.field label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.field input,.field select{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;width:100%}
+.btn{border:0;border-radius:14px;padding:14px 16px;font-weight:800;font-size:16px;width:100%;background:var(--sage);color:#fff;margin-top:8px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.warn{background:transparent;color:var(--clay);border:1px solid var(--clay-l)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hist{font-size:14px;margin:6px 0 0;padding:0;list-style:none}
+.hist li{padding:7px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted)}
+.hist li b{color:var(--ink);font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;font-weight:700;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.board{padding:6px 14px}
+.board .p{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.board .p:first-child{border-top:0}
+.board .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+.board .bar{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.board .bar i{display:block;height:100%;background:var(--sage);border-radius:4px}
+.board .n{font-weight:800;width:28px;text-align:right}
+.status{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+.status.local{color:#9a4726}
+
+
+.sync{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--muted);text-transform:none;letter-spacing:0}
+.sync i{width:8px;height:8px;border-radius:50%;background:#bbb;display:inline-block}
+.sync.shared i{background:#3d9a5b} .sync.local i,.sync.readonly i{background:var(--clay)} .sync.saving i{background:var(--sun)}
+.install{padding:14px 44px 14px 14px;position:relative;margin-bottom:10px;background:#fff8e6;border-color:#f0dfb0;font-size:14px;line-height:1.5}
+.install .it{display:block;font-size:15px;font-weight:800;margin-bottom:2px}
+.xbtn{position:absolute;top:6px;right:6px;width:36px;height:36px;border:0;background:transparent;font-size:22px;color:var(--muted);border-radius:50%}
+.search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px 14px 12px 40px;font-size:16px;margin:2px 0 10px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236b756f' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:13px center}
+.chip .dot{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--clay);color:#fff;font-size:11px;margin-left:6px;padding:0 5px}
+.chip.on .dot{background:#fff;color:var(--clay)}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:14px}
+.toast button{background:transparent;border:0;color:#9fd6b0;font-weight:800;font-size:14px;padding:4px 2px}
+.toast:not(.show){pointer-events:none}
+.pick{display:grid;gap:10px;margin:14px 0 6px}
+.pick button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px;font-size:18px;font-weight:800;display:flex;align-items:center;gap:12px;text-align:left}
+.pick .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800}
+.freqgrid{display:grid;grid-template-columns:1fr 92px;gap:8px 10px;align-items:center;padding:6px 14px 14px}
+.freqgrid input{border:1px solid var(--line);border-radius:10px;padding:9px 10px;text-align:center;width:100%;background:#fff}
+.freqgrid span{font-weight:700;font-size:15px}
+.loading{padding:40px 10px;text-align:center;color:var(--muted)}
+.ro .tick{opacity:.35;pointer-events:none}
+
+.daypick{display:flex;gap:6px;padding:4px 14px 14px}
+.daypick button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font-weight:800;font-size:13px;color:var(--muted)}
+.daypick button.on{background:var(--sky);border-color:var(--sky);color:#fff}
+.mrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:8px 0}
+.mrow input[type=text]{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;width:100%}
+.mrow label{font-size:13px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.mrow input[type=checkbox]{width:20px;height:20px;accent-color:var(--sage)}
+.mrow .rm{border:0;background:transparent;color:var(--clay);font-size:22px;width:36px;height:36px;border-radius:50%}
+.filein{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">Loading…</div></div>
+<nav class="tabs"><div class="in" id="tabs"></div></nav>
+<div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="importfile" class="filein" accept="application/json,.json">
+<script>
+/* Home Care — family home maintenance tracker. MIT licence. Data is stored only in this browser (localStorage). */
+(function(){
+"use strict";
+var T = [
+/* WEEKLY */
+["w-toilets","w","Bathrooms","adults","Clean toilets, inside & out","Bowl, seat hinges, base and the floor around it. Teen bathrooms often need the floor and wall behind the bowl too."],
+["w-showers","w","Bathrooms","adults","Clean showers, baths & screens","Squeegee glass and spray with a mould inhibitor — Humidity grows mould fast. Check silicone corners for black spots."],
+["w-sinks","w","Bathrooms","teen","Wipe basins, taps, mirrors & benches","Microfibre + glass spray. Polish the taps so water spots don't build up."],
+["w-towels","w","Bathrooms","all","Wash bath towels, hand towels & bath mats","Hot wash. Hang in the sun to dry where you can."],
+["w-own-bath","w","Bathrooms","teen","Kids: tidy & wipe own bathroom/basin","Clear products off the bench, wipe the basin, hang the towel up to dry."],
+["w-kitchen","w","Kitchen","adults","Deep-wipe benches, splashback & stovetop","Daily wipe-downs keep it tidy; this is the weekly degrease of stovetop, knobs and splashback."],
+["w-microwave","w","Kitchen","teen","Clean the microwave","Heat a bowl of water + lemon for 3 minutes, leave the door shut 2 minutes, then wipe."],
+["w-fridge","w","Kitchen","all","Clear old food out of the fridge","Do it the night before bin day. Wipe any spills on shelves."],
+["w-sink-drain","w","Kitchen","adults","Clean the kitchen sink & drain","Scrub the sink, flush the drain with hot water. Bicarb + vinegar if it smells."],
+["w-bins","w","Kitchen","teen","Bins out & kitchen bin wiped","Take wheelie bins out the night before collection; wipe inside the kitchen bin and lid."],
+["w-sheets","w","Bedrooms","all","Change bed sheets & pillowcases","Weekly for every bed. Kids strip & remake their own. If the dogs sleep on beds this matters even more."],
+["w-son-room","w","Bedrooms","teen","Kids: clean own room","Dishes back to the kitchen, clothes in the basket, desk cleared, bin emptied, floor clear so the robot can do its job."],
+["w-dust","w","Living","all","Dust surfaces & TV unit","Microfibre on shelves, TV, bedside tables, window sills. Top to bottom."],
+["w-touch","w","Living","all","Wipe high-touch spots","Door handles, light switches, remotes, phones, fridge and pantry handles, game controllers."],
+["w-glass","w","Living","teen","Clean glass doors & low windows","Dog nose prints on the sliding doors and low glass — inside and out."],
+["w-couch","w","Living","teen","Vacuum couches & remove dog hair","Vacuum cushions and crevices; use a rubber glove or lint roller on fabric for dog hair."],
+["w-edges","w","Floors","adults","Vacuum what the robot can't reach","Stairs, corners, skirting edges, under low furniture, rugs with fringes, and dog beds' surroundings."],
+["w-entry","w","Floors","teen","Shake doormats & sweep entries","Dogs track dirt in — shake mats and sweep the back door/dog entry and patio."],
+["w-robot-brush","w","Robot","teen","Untangle dog hair from robot brushes","Pull hair off the main brush, side brush and wheel axles. Dog hair wraps quickly and slows the robot."],
+["w-dog-bed","w","Dogs","all","Wash dog bedding & blankets","Inside-and-outside dogs bring in dirt, fleas and allergens. Shake outside first, hot wash, dry fully."],
+["w-dog-bowls","w","Dogs","teen","Scrub & sanitise dog bowls","Rinse daily; weekly give them a hot soapy scrub (or the dishwasher). Clean under the bowls too."],
+["w-dog-poo","w","Dogs","teen","Yard poo pick-up & hose dog area","Do it at least twice a week. Hose the dogs' favourite spots to cut smell and flies."],
+["w-laundry","w","Laundry","adults","Clean lint filter & wipe laundry","Empty the dryer lint filter each use; weekly wipe the tub, benches and washer lid."],
+
+/* MONTHLY */
+["m-robot","m","Robot","adults","Robot deep clean","Wash the dustbin & filter (tap only if filter isn't washable), wipe cliff sensors, camera/lidar, charging contacts and wheels. Wash the base station water tanks and mop tray. Check if the auto-empty bag is full."],
+["m-dishwasher","m","Kitchen","adults","Clean dishwasher filter & seals","Twist out the filter and rinse, wipe the door seal, then run an empty hot cycle with a dishwasher cleaner."],
+["m-rangehood","m","Kitchen","adults","Clean rangehood filters","Soak metal filters in hot water + dishwashing liquid or run through the dishwasher. Wipe the hood."],
+["m-cupboards","m","Kitchen","all","Wipe cupboard doors & handles","Greasy fingerprints build up — warm soapy water on all kitchen doors and drawer fronts."],
+["m-appliances","m","Kitchen","teen","Wipe small appliances & fridge outside","Toaster crumb tray, kettle outside, fridge doors and door seals."],
+["m-washer","m","Laundry","adults","Clean the washing machine","Run an empty hot cycle with washer cleaner. Wipe the door seal (front loader) and pull out the detergent drawer to clean. Leave the door ajar."],
+["m-fans","m","Living","adults","Dust ceiling fans","In warm climates fans run most of the year. Use an old pillowcase over each blade so dust falls inside it."],
+["m-aircon","m","Living","adults","Clean split-system aircon filters","Pop open the front, slide out the filters, vacuum or rinse, dry fully, refit. Monthly while it's running a lot (summer)."],
+["m-skirting","m","Living","teen","Wipe skirting boards & doors","Dogs and bags leave scuff marks. Damp microfibre along skirting, door frames and lower doors."],
+["m-grout","m","Bathrooms","adults","Scrub grout & check for mould","Grout brush on shower and floor tiles. Treat any black mould spots straight away."],
+["m-exhaust","m","Bathrooms","teen","Vacuum bathroom exhaust fan covers","Dust-clogged covers stop moisture clearing, which feeds mould."],
+["m-wheelie","m","Outdoors","teen","Hose out the wheelie bins","After collection day. Hose, a squirt of disinfectant, tip upside down to dry."],
+["m-patio","m","Outdoors","teen","Sweep & hose the patio","Clear cobwebs and spider webs around doors, lights and outdoor furniture."],
+["m-smoke-test","m","Safety","adults","Test smoke alarms (press test button)","Press and hold each alarm's test button — interconnected alarms should all sound together. QFD recommends testing monthly."],
+["m-flea","m","Dogs","adults","Flea, tick & worming treatment","In eastern Australia paralysis ticks are a real risk — keep tick prevention up to date year-round. Write the date on the box."],
+["m-dog-bath","m","Dogs","teen","Bath & brush the dogs","Bath with dog shampoo, check ears, check for ticks (run fingers over head, neck, between toes). Trim nails if they click on the floor."],
+
+/* 3-MONTHLY */
+["q-oven","q","Kitchen","adults","Clean the oven inside","Bicarb paste overnight on the oven floor and door, wipe off next day. Clean the racks in the laundry tub."],
+["q-pantry","q","Kitchen","all","Clean out the pantry","Check use-by dates, wipe shelves, watch for pantry moths or ants."],
+["q-descale","q","Kitchen","teen","Descale kettle & coffee machine","Vinegar/water in the kettle, boil, rinse twice. Use descaler in the coffee machine."],
+["q-windows","q","Living","all","Clean windows, sills & tracks","Inside and out where reachable. Vacuum tracks first, then wipe. Rinse flyscreens."],
+["q-blinds","q","Living","teen","Dust blinds & wash curtains","Vacuum or wipe blinds; wash sheer curtains on gentle."],
+["q-behind","q","Floors","all","Clean behind & under furniture","Pull out couches, beds and the fridge front. Dog hair and lost toys collect there."],
+["q-mattress","q","Bedrooms","all","Vacuum & rotate mattresses","Vacuum the top, rotate end-to-end, air the room."],
+["q-lights","q","Living","adults","Clean light fittings & switches","Wipe light covers (bugs collect inside in summer) and vacuum vents."],
+["q-dog-gear","q","Dogs","teen","Wash collars, leads, harnesses & toys","Soft toys in a laundry bag on a cold wash; hard toys in hot soapy water. Throw out broken toys."],
+["q-bbq","q","Outdoors","adults","Clean the BBQ","Scrape plates, empty the fat tray, check gas hose for cracks."],
+["q-rcd","q","Safety","adults","Test safety switches (RCDs)","Press the 'T' test button on each safety switch at the switchboard — power should cut. Reset. If it doesn't trip, call an electrician."],
+["q-extinguisher","q","Safety","adults","Check fire blanket & extinguisher","Gauge needle in the green, blanket accessible in the kitchen. Shake dry-powder extinguishers."],
+["q-pests","q","Outdoors","adults","Check for pests & spot treat","Look for ants, cockroaches and spiders around doors and the meter box. Use pet-safe products where the dogs go."],
+["q-robot-parts","q","Robot","adults","Check robot wear parts","Inspect the side brush, main brush and mop pads. Order replacements if frayed (most last 3–6 months)."],
+["q-fence","q","Dogs","adults","Walk the fence line for escape spots","Check gaps under fences and gates, loose palings and gate latches. Small dogs find small holes."],
+
+/* 6-MONTHLY */
+["h-bedding","h","Bedrooms","all","Wash pillows, doonas & mattress protectors","Big loads may need the laundromat. Dry completely in the sun."],
+["h-couch","h","Living","adults","Shampoo couches & rugs","Hire a carpet/upholstery cleaner or use a spot cleaner — dogs make fabric smell over time."],
+["h-fridge","h","Kitchen","adults","Fridge coils, seals & water filter","Vacuum the coils behind or under the fridge, clean seals, replace the water filter if you have one."],
+["h-walls","h","Living","all","Wash marks off walls & doors","Hallways, light switch areas and the dogs' height along walls."],
+["h-wardrobes","h","Bedrooms","all","Declutter wardrobes & drawers","Kids outgrow things fast — donate what doesn't fit. Check for mould on leather shoes and bags (humidity)."],
+["h-pressure","h","Outdoors","adults","Pressure wash paths, patio & dog run","Removes slime and dog urine build-up. Keep dogs inside while it dries."],
+["h-gutters","h","Outdoors","pro","Clean gutters & downpipes","Do this before storm season (Oct–Nov) and again in autumn. Blocked gutters overflow into the roof and walls in a storm.",10],
+["h-outdoor-furn","h","Outdoors","teen","Clean outdoor furniture & cushions","Scrub, rinse and treat for mould. Store cushions dry."],
+["h-dryer","h","Laundry","adults","Clean dryer vent & behind machines","Vacuum the lint around and behind the dryer — a fire risk if it builds up."],
+["h-robot-replace","h","Robot","adults","Replace robot filter, side brush & mop pads","Swap consumables per your model's manual. Clean the base station's dust bay."],
+["h-hws-valve","h","Plumbing","adults","Test hot water relief valve","Gently lift the lever on the TPR valve for a few seconds (if storage tank). Water should flow and stop cleanly. Stand clear — it's hot."],
+["h-garage","h","Outdoors","all","Clean out the garage","Sweep, clear cobwebs, check for rodents, toss junk."],
+
+/* YEARLY CLEAN */
+["y-carpets","y","Floors","pro","Professional carpet steam clean","With two dogs, a yearly hot-water extraction clean keeps carpets fresh and removes allergens."],
+["y-exterior-wash","y","Outdoors","pro","Soft-wash house exterior & eaves","Removes mould, mildew and cobwebs from walls and eaves — common in humid climates."],
+["y-high","y","Living","all","High clean: cobwebs, cornices & vents","Extendable duster along cornices, top of cupboards, air vents and high windows."],
+["y-cupboards","y","Kitchen","all","Empty & clean every cupboard","Kitchen, bathroom and laundry cupboards. Toss expired medicines and cleaning products."],
+["y-windows-ext","y","Outdoors","pro","Exterior high windows professionally","Second-storey or hard-to-reach windows and flyscreens."],
+["y-declutter","y","Living","all","Whole-house declutter","One room a weekend. Donate, sell or bin."],
+["y-solar","y","Outdoors","pro","Clean solar panels (if you have them)","Dust, bird droppings and leaves cut output. Only from the ground with a long brush, or use a pro."],
+
+/* YEARLY MAINTENANCE — 12-year-old home */
+["ym-smoke-2027","ym","Safety","pro","Smoke alarms: QLD 2027 compliance & 10-year replacement","From 1 January 2027 all Queensland homes need interconnected photoelectric smoke alarms (AS 3786-2014) in every bedroom, hallways joining bedrooms, and every storey. Smoke alarms must be replaced every 10 years — if your house is older than that, the original alarms are past their life. Outside Queensland, check your state's rules. Book a licensed electrician now; December is busy. Then yearly: vacuum alarms and replace batteries if they aren't 10-year sealed.",0],
+["ym-termite","ym","Structure","pro","Termite & timber pest inspection","Much of Australia (especially Queensland) is high-risk for termites. Get a licensed inspector at least yearly; check the barrier/bait system warranty. Keep garden beds and mulch away from the slab edge.",14],
+["ym-aircon","ym","Electrical","pro","Professional aircon service","Coil clean, drain check and outdoor condenser clean before summer. Clean coils run cheaper.",14],
+["ym-storm","ym","Safety","adults","Storm season prep & emergency kit","Before summer storms: trim branches near the roof, tie down outdoor items, check torch, radio, batteries, first aid kit and pet supplies. Agree a family plan (including the dogs).",3],
+["ym-roof","ym","Structure","pro","Roof inspection","Check for cracked/slipped tiles, ridge capping pointing, loose screws or rust on metal roofs, and flashing around penetrations. Look in the roof space for leaks or vermin.",30],
+["ym-wetseal","ym","Plumbing","adults","Re-silicone wet areas & check for leaks","After 10+ years, silicone around showers, baths, basins and benches is often failing. Cut out mouldy/cracked silicone and re-seal. Look for loose tiles or drummy grout."],
+["ym-leaks","ym","Plumbing","adults","Leak check: taps, toilets & water meter","Note the water meter, use no water for 1–2 hours, re-check. Put food dye in toilet cisterns — colour in the bowl means a leaking seal."],
+["ym-hoses","ym","Plumbing","adults","Inspect appliance hoses","Washing machine, dishwasher and fridge hoses — Rubber hoses over ~10 years old can burst. Replace with braided steel if bulging or cracked."],
+["ym-hws","ym","Plumbing","pro","Hot water system check","Storage tanks typically last 10–15 years; once yours is 10+ years old, have a plumber check the anode rod and tank condition before it fails. Look for rust or weeping at the base."],
+["ym-drains","ym","Plumbing","adults","Clear stormwater drains & grates","Clear leaves from grates, pits and garden drains so heavy rain drains away from the house."],
+["ym-electrical","ym","Electrical","adults","Electrical safety walk-through","Check for loose power points, scorched plugs, frayed cords and flickering lights. Get an electrician to look at anything warm or buzzing."],
+["ym-doors","ym","Structure","adults","Lubricate locks, hinges & sliding tracks","Silicone spray on locks and tracks, tighten hinge screws, adjust sticky doors. Check flyscreens and pet-scratched screens."],
+["ym-garage-door","ym","Structure","pro","Service the garage door","Lubricate rollers and springs, test the auto-reverse safety (place a box under it), replace remote batteries."],
+["ym-paint","ym","Structure","adults","Exterior paint, caulking & timber","Touch up flaking paint, re-caulk gaps around windows and doors, re-oil or seal decks and timber."],
+["ym-cracks","ym","Structure","adults","Check walls, slab & paths for cracks","Photograph cracks with a coin for scale and compare yearly. Growing cracks need a builder's look."],
+["ym-pest","ym","Outdoors","pro","General pest control treatment","Ask for a pet-safe treatment and keep the dogs off treated areas until dry."],
+["ym-trees","ym","Outdoors","pro","Trim trees & check yard drainage","Cut back branches over the roof and power lines before storm season. Make sure soil slopes away from the house."],
+["ym-fans","ym","Electrical","adults","Tighten ceiling fan screws & check balance","Wobbly fans loosen over time. Turn the power off at the switch first."],
+["ym-insurance","ym","Admin","adults","Review home & contents insurance","Update the contents list and photos, check storm and flood cover."],
+["ym-vet","ym","Dogs","adults","Dogs' annual vet check & vaccinations","Vaccinations, dental check and weight check. Update microchip details if anything has changed."]
+];
+
+var GROUP_ORDER = ["w","m","q","h","y","ym"];
+var GLABEL = {w:"Weekly",m:"Monthly",q:"3 months",h:"6 months",y:"Yearly clean",ym:"Yearly upkeep"};
+var GLONG = {w:"Weekly",m:"Monthly",q:"Every 3 months",h:"Every 6 months",y:"Yearly clean",ym:"Yearly maintenance"};
+var DAYNAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var ROBOT_PRE = [["pre-floor","Floors clear: shoes, socks, cords, chargers, toys"],["pre-accident","Check for pet accidents first (robots smear them)"],["pre-bowls","Lift pet water bowls / mats off the robot's path"],["pre-doors","Open the doors to rooms that need doing"]];
+var ROBOT_POST = [["post-bin","Empty the dust bin (if no auto-empty base)"],["post-water","Empty dirty water & refill the clean tank"],["post-pads","Rinse or wash mop pads, hang to dry"]];
+var AVCOL = ["#4f7a5f","#c4663f","#3f74a8","#7a5a8c","#d9a526","#5a5243"];
+var KEY = "homecare-v1", PKEY = "homecare-prefs-v1";
+
+/* ---------- helpers ---------- */
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function todayStr(){ return ymd(new Date()); }
+function parse(s){ var p=String(s).split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
+function addDays(s,n){ var d=parse(s); d.setDate(d.getDate()+n); return ymd(d); }
+function diff(a,b){ return Math.round((parse(a)-parse(b))/86400000); }
+function nice(s){ return parse(s).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}); }
+function hash(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h); }
+function validDate(s){ return typeof s==="string" && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+var $ = function(id){ return document.getElementById(id); };
+
+/* ---------- data ---------- */
+function defaultCfg(){
+  return {members:[{n:"Adult 1",kid:false},{n:"Adult 2",kid:false},{n:"Teen",kid:true}],
+          freq:{w:7,m:30,q:91,h:182,y:365,ym:365}, robotDays:[1,3,5], removed:[], custom:[], start:todayStr(), setup:false};
+}
+function normCfg(c){
+  var d = defaultCfg(); c = c ? clone(c) : d;
+  if(!Array.isArray(c.members) || !c.members.length) c.members = d.members;
+  c.members = c.members.slice(0,6).map(function(m,i){
+    if(typeof m==="string") m={n:m,kid:false};
+    return {n:(m && typeof m.n==="string" && m.n.trim()) ? m.n.trim().slice(0,16) : "Person "+(i+1), kid:!!(m && m.kid)};
+  });
+  c.freq = Object.assign({}, d.freq, c.freq||{});
+  GROUP_ORDER.forEach(function(g){ var n=+c.freq[g]; c.freq[g]=(n>=1&&n<=3650)?Math.round(n):d.freq[g]; });
+  c.robotDays = Array.isArray(c.robotDays) ? c.robotDays.filter(function(x){return x>=0&&x<=6;}).map(Number) : d.robotDays;
+  c.removed = Array.isArray(c.removed) ? c.removed.filter(function(x){return typeof x==="string";}) : [];
+  c.custom = Array.isArray(c.custom) ? c.custom.filter(function(x){return x && typeof x.name==="string" && GLABEL[x.g];}) : [];
+  c.start = validDate(c.start) ? c.start : d.start;
+  c.setup = !!c.setup;
+  return c;
+}
+var DATA = {done:{}, cfg:normCfg(null), robot:{}};
+function load(){
+  try{
+    var raw = JSON.parse(localStorage.getItem(KEY)||"null");
+    if(raw){ DATA.done = raw.done && typeof raw.done==="object" ? raw.done : {}; DATA.cfg = normCfg(raw.cfg); DATA.robot = raw.robot||{}; }
+  }catch(e){}
+}
+var storageOK = true;
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DATA)); storageOK = true; }
+  catch(e){ storageOK = false; toast("Couldn't save — is private browsing on?"); }
+}
+load(); save();
+if(navigator.storage && navigator.storage.persist){ try{ navigator.storage.persist(); }catch(e){} }
+
+var prefs = {me:null, filter:"w", hideInstall:false};
+try{ Object.assign(prefs, JSON.parse(localStorage.getItem(PKEY)||"{}")); }catch(e){}
+function savePrefs(){ try{ localStorage.setItem(PKEY, JSON.stringify(prefs)); }catch(e){} }
+if(prefs.me!=null && prefs.me>=DATA.cfg.members.length) prefs.me=null;
+
+/* ---------- tasks ---------- */
+function allTasks(){
+  var cfg = DATA.cfg;
+  return T.map(function(t,i){ return {id:t[0],g:t[1],area:t[2],who:t[3],name:t[4],tip:t[5],first:t[6],idx:i,custom:false}; })
+    .concat(cfg.custom.map(function(c,i){ return {id:c.id,g:c.g,area:c.area||"Other",who:"all",name:c.name,tip:c.tip||"",first:c.first,idx:1000+i,custom:true}; }))
+    .filter(function(t){ return cfg.removed.indexOf(t.id)<0; })
+    .filter(function(t){ return cfg.robotDays.length || t.area!=="Robot"; });
+}
+function findTask(id){ return allTasks().filter(function(x){return x.id===id;})[0]; }
+function freq(t){ return DATA.cfg.freq[t.g] || 7; }
+function rec(t){ var r = DATA.done[t.id]; return (r && Array.isArray(r.h)) ? r : {h:[],who:null}; }
+function lastDone(t){ var h=rec(t).h.filter(function(e){return e&&validDate(e.d);}).slice().sort(function(a,b){return a.d<b.d?1:-1;}); return h[0]||null; }
+function dueDate(t){
+  var ld=lastDone(t), days=freq(t), start=DATA.cfg.start;
+  if(ld) return addDays(ld.d, days);
+  if(typeof t.first==="number") return addDays(start, t.first);
+  if(validDate(t.first)) return t.first;
+  if(t.g==="w") return addDays(start, t.idx % 7);
+  var spread=Math.max(1, Math.min(days,120)-7);
+  return addDays(start, 7 + hash(t.id) % spread);
+}
+function daysLeft(t){ return diff(dueDate(t), todayStr()); }
+function status(t){ var d=daysLeft(t); return d<0?"over":(d<=(freq(t)<=7?1:7)?"soon":"ok"); }
+function whoOf(t){ return rec(t).who || t.who; }
+function memberName(i){ var m=DATA.cfg.members[i]; return m?m.n:"Someone"; }
+function kids(){ return DATA.cfg.members.map(function(m,i){return m.kid?i:-1;}).filter(function(i){return i>=0;}); }
+function whoLabel(w){
+  if(w==="all") return "Anyone"; if(w==="adults") return "Adults"; if(w==="pro") return "Book a pro";
+  if(w==="teen"){ var k=kids(); return k.length===1 ? memberName(k[0]) : k.length ? "Kids" : "Anyone"; }
+  if(/^p\d$/.test(w)) return DATA.cfg.members[+w[1]] ? memberName(+w[1]) : "Anyone";
+  return "Anyone";
+}
+function isMine(t){
+  var w=whoOf(t), me=prefs.me, m=DATA.cfg.members[me]; if(!m) return false;
+  if(w==="all") return true;
+  if(w==="adults"||w==="pro") return !m.kid;
+  if(w==="teen") return kids().length ? m.kid : true;
+  if(/^p\d$/.test(w)) return DATA.cfg.members[+w[1]] ? w==="p"+me : true;
+  return true;
+}
+function dueText(t){
+  var d=daysLeft(t);
+  if(d<-1) return "Overdue "+(-d)+" days"; if(d===-1) return "Overdue since yesterday";
+  if(d===0) return "Due today"; if(d===1) return "Due tomorrow"; if(d<14) return "Due in "+d+" days";
+  return "Due "+nice(dueDate(t));
+}
+function sortByDue(a,b){ var x=dueDate(a), y=dueDate(b); return x<y?-1:x>y?1:GROUP_ORDER.indexOf(a.g)-GROUP_ORDER.indexOf(b.g); }
+
+/* ---------- actions ---------- */
+var lastAction=null;
+function markDone(id, dateStr){
+  var r = clone(rec({id:id}));
+  var entry = {d:dateStr||todayStr(), by:memberName(prefs.me)};
+  r.h.unshift(entry); r.h.sort(function(a,b){return a.d<b.d?1:-1;}); if(r.h.length>8) r.h.length=8;
+  DATA.done[id]=r; save(); lastAction={id:id,entry:entry}; render();
+  var t=findTask(id);
+  toast("Done ✓"+(t?" — next due "+nice(dueDate(t)):""), "Undo", function(){ undoEntry(lastAction); });
+}
+function undoEntry(a){
+  if(!a || !DATA.done[a.id]) return; var r=clone(DATA.done[a.id]);
+  var i=r.h.findIndex(function(e){return e.d===a.entry.d && e.by===a.entry.by;}); if(i>=0) r.h.splice(i,1);
+  DATA.done[a.id]=r; save(); lastAction=null; render(); toast("Undone");
+}
+function setWho(id,w){ var r=clone(rec({id:id})); r.who=w; DATA.done[id]=r; save(); render(); }
+function toggleRobot(key){
+  var t=todayStr(), r=Object.assign({}, DATA.robot[t]||{}); r[key]=!r[key]; DATA.robot[t]=r;
+  Object.keys(DATA.robot).forEach(function(k){ if(validDate(k)&&diff(t,k)>14) delete DATA.robot[k]; });
+  save(); render();
+}
+
+/* ---------- UI ---------- */
+var ICON = {
+  check:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f7a5f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>',
+  mine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+  robot:'<svg width="38" height="38" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#3f74a8"/><circle cx="20" cy="20" r="11" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/><circle cx="20" cy="13" r="3" fill="#fff"/></svg>'
+};
+var TABS=[["today","Today",ICON.today],["mine","My jobs",ICON.mine],["all","All jobs",ICON.list],["settings","Settings",ICON.gear]];
+function route(){ var h=(location.hash||"").replace("#",""); return TABS.some(function(t){return t[0]===h;})?h:"today"; }
+function header(title, sub){
+  return '<header class="top"><h1><small>'+esc(sub)+'</small>'+esc(title)+'</h1><div class="me"><button class="chip" id="whoami" style="padding:7px 12px;color:var(--ink)">'+esc(prefs.me==null?"Who are you?":memberName(prefs.me))+' ▾</button>'+
+    '<span class="sync '+(storageOK?"shared":"local")+'"><i></i>'+(storageOK?"On this phone":"Not saving")+'</span></div></header>';
+}
+function taskRow(t){
+  var st=status(t), ld=lastDone(t);
+  var meta='<span class="pill f-'+t.g+'">'+GLABEL[t.g]+'</span><span class="pill who">'+esc(whoLabel(whoOf(t)))+'</span><span class="due '+st+'">'+dueText(t)+'</span>';
+  if(ld) meta+='<span>· last '+esc(nice(ld.d))+' ('+esc(ld.by)+')</span>';
+  return '<div class="card task '+st+'" data-open="'+esc(t.id)+'" data-name="'+esc((t.name+" "+t.area).toLowerCase())+'"><div class="body"><div class="name">'+esc(t.name)+'</div><div class="meta">'+meta+'</div></div><button class="tick" aria-label="Mark done" data-done="'+esc(t.id)+'">'+ICON.check+'</button></div>';
+}
+function isStandalone(){ return window.navigator.standalone===true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches); }
+var deferredInstall=null;
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferredInstall=e; scheduleRender(); });
+function installCard(){
+  if(prefs.hideInstall || isStandalone()) return "";
+  var ua=navigator.userAgent||"", ios=/iPhone|iPad|iPod/.test(ua);
+  var how = deferredInstall ? 'Install it so it opens like an app and works offline.<button class="btn" id="installnow" style="margin-top:10px">Install app</button>'
+    : ios ? 'In <b>Safari</b>, tap <b>Share</b> → <b>Add to Home Screen</b> → <b>Add</b>.'
+    : 'Open your browser menu (<b>⋮</b>) → <b>Install app</b> or <b>Add to Home screen</b>.';
+  return '<div class="card install"><span class="it">📱 Put this on your home screen</span>'+how+'<button class="xbtn" data-hideinstall="1" aria-label="Dismiss">×</button></div>';
+}
+function robotCard(){
+  var rd=DATA.cfg.robotDays; if(!rd.length) return "";
+  var dow=new Date().getDay(), t=todayStr(), names=["S","M","T","W","T","F","S"], order=[1,2,3,4,5,6,0];
+  var days=order.map(function(d){return '<i class="'+(rd.indexOf(d)>=0?"on":"")+(d===dow?" today":"")+'">'+names[d]+'</i>';}).join("");
+  var isDay=rd.indexOf(dow)>=0, list=order.filter(function(d){return rd.indexOf(d)>=0;}).map(function(d){return DAYNAMES[d];}).join(" · ");
+  var h='<div class="card robot"><div class="rh">'+ICON.robot+'<div><b>'+(isDay?"Robot vac runs today":"Robot vac & mop")+'</b><span>';
+  if(isDay) h+=list+' — tick as you go';
+  else { var n=1; while(rd.indexOf((dow+n)%7)<0) n++; h+='Next run '+(n===1?"tomorrow":nice(addDays(t,n))); }
+  h+='</span></div></div><div class="days">'+days+'</div>';
+  if(isDay){
+    var r=DATA.robot[t]||{};
+    var chk=function(it){ return '<label class="chk'+(r[it[0]]?" done":"")+'"><input type="checkbox" data-robot="'+it[0]+'"'+(r[it[0]]?" checked":"")+'><span>'+esc(it[1])+'</span></label>'; };
+    h+='<div class="sub">Before it runs</div>'+ROBOT_PRE.map(chk).join("")+'<div class="sub">After it runs</div>'+ROBOT_POST.map(chk).join("");
+  } else h+='<div class="note" style="padding:6px 2px 4px">Night before: everyone picks things up off the floor so the robot gets a clear run.</div>';
+  return h+'</div>';
+}
+function viewToday(){
+  var tasks=allTasks(), t=todayStr();
+  var over=tasks.filter(function(x){return daysLeft(x)<0;}).sort(sortByDue);
+  var now=tasks.filter(function(x){return daysLeft(x)===0;}).sort(sortByDue);
+  var week=tasks.filter(function(x){var d=daysLeft(x);return d>0&&d<=7;}).sort(sortByDue);
+  var doneWeek=0; Object.keys(DATA.done).forEach(function(k){ (DATA.done[k].h||[]).forEach(function(e){ if(validDate(e.d)){ var dd=diff(t,e.d); if(dd>=0&&dd<7) doneWeek++; } }); });
+  var hr=new Date().getHours(), greet=(hr<12?"Good morning":hr<17?"Good afternoon":"Good evening")+(prefs.me!=null?", "+memberName(prefs.me):"");
+  var h=header("Home care", greet+" · "+nice(t))+installCard();
+  h+='<div class="stats"><div class="card stat over"><b>'+over.length+'</b><span>Overdue</span></div><div class="card stat soon"><b>'+(now.length+week.length)+'</b><span>Next 7 days</span></div><div class="card stat ok"><b>'+doneWeek+'</b><span>Done this week</span></div></div>';
+  h+=robotCard();
+  if(over.length) h+='<h2>Overdue<span class="count">'+over.length+'</span></h2><div class="list">'+over.map(taskRow).join("")+'</div>';
+  h+='<h2>Today<span class="count">'+now.length+'</span></h2>'+(now.length?'<div class="list">'+now.map(taskRow).join("")+'</div>':'<div class="card empty">Nothing else due today. Nice.</div>');
+  if(week.length) h+='<h2>Coming up this week<span class="count">'+week.length+'</span></h2><div class="list">'+week.map(taskRow).join("")+'</div>';
+  return h;
+}
+function viewMine(){
+  if(prefs.me==null) return header("My jobs","")+'<div class="card empty">Tap <b>Who are you?</b> at the top to see your jobs.</div>';
+  var mine=allTasks().filter(isMine).filter(function(x){return daysLeft(x)<=14;}).sort(sortByDue);
+  var h=header("My jobs", memberName(prefs.me)+" · next 2 weeks");
+  h+=mine.length?'<div class="list">'+mine.map(taskRow).join("")+'</div>':'<div class="card empty">No jobs for you in the next two weeks.</div>';
+  return h+'<div class="card note" style="margin-top:14px">Shows jobs assigned to you plus "Anyone" jobs. Tap a job to reassign it.</div>';
+}
+function viewAll(){
+  var f=(prefs.filter==="all"||GLABEL[prefs.filter])?prefs.filter:"w", tasks=allTasks();
+  var chips='<button class="chip'+(f==="all"?" on":"")+'" data-filter="all">All</button>'+GROUP_ORDER.map(function(g){
+    var o=tasks.filter(function(t){return t.g===g&&daysLeft(t)<0;}).length;
+    return '<button class="chip'+(f===g?" on":"")+'" data-filter="'+g+'">'+GLABEL[g]+(o?'<span class="dot">'+o+'</span>':'')+'</button>';
+  }).join("");
+  var list=tasks.filter(function(t){return f==="all"||t.g===f;});
+  var h=header("All jobs", list.length+" jobs"+(f==="all"?"":" · every "+DATA.cfg.freq[f]+" days"));
+  h+='<input class="search" id="search" type="search" placeholder="Search jobs… e.g. oven, gutters, dog" autocomplete="off"><div class="chips">'+chips+'</div>';
+  if(f==="ym") h+='<div class="card note">Upkeep for an established home (10+ years). Safety items like smoke alarms, storm prep and termites come up first.</div>';
+  if(f==="all") h+='<div class="list" style="margin-top:6px">'+list.sort(sortByDue).map(taskRow).join("")+'</div>';
+  else {
+    var areas={}; list.forEach(function(t){(areas[t.area]=areas[t.area]||[]).push(t);});
+    Object.keys(areas).sort().forEach(function(a){ h+='<div class="area">'+esc(a)+'</div><div class="list">'+areas[a].sort(sortByDue).map(taskRow).join("")+'</div>'; });
+  }
+  return h+'<div class="card empty" id="nores" style="display:none;margin-top:8px">No jobs match.</div><button class="btn ghost" id="addbtn" style="margin-top:18px">+ Add your own job</button>';
+}
+function membersEditor(){
+  return '<div id="members">'+DATA.cfg.members.map(function(m,i){
+    return '<div class="mrow"><input type="text" data-mname="'+i+'" value="'+esc(m.n)+'" maxlength="16" aria-label="Name"><label><input type="checkbox" data-mkid="'+i+'"'+(m.kid?" checked":"")+'>Kid</label>'+
+      (DATA.cfg.members.length>1?'<button class="rm" data-mrm="'+i+'" aria-label="Remove">×</button>':'<span></span>')+'</div>';
+  }).join("")+'</div>'+(DATA.cfg.members.length<6?'<button class="btn ghost" id="addmember">+ Add person</button>':'');
+}
+function dayPicker(){
+  var rd=DATA.cfg.robotDays;
+  return '<div class="daypick">'+[1,2,3,4,5,6,0].map(function(d){return '<button data-rday="'+d+'" class="'+(rd.indexOf(d)>=0?"on":"")+'">'+DAYNAMES[d].slice(0,2)+'</button>';}).join("")+'</div>';
+}
+function viewSettings(){
+  var t=todayStr(), cfg=DATA.cfg, counts=cfg.members.map(function(){return 0;});
+  Object.keys(DATA.done).forEach(function(k){ (DATA.done[k].h||[]).forEach(function(e){ if(validDate(e.d)&&diff(t,e.d)<30){ var i=cfg.members.map(function(m){return m.n;}).indexOf(e.by); if(i>=0) counts[i]++; } }); });
+  var max=Math.max.apply(null,counts.concat([1]));
+  var h=header("Settings","Your household");
+  h+='<h2>Jobs done · last 30 days</h2><div class="card board">'+cfg.members.map(function(m,i){
+    return '<div class="p"><div class="av" style="background:'+AVCOL[i%6]+'">'+esc(m.n[0].toUpperCase())+'</div><div style="width:80px;font-weight:700">'+esc(m.n)+'</div><div class="bar"><i style="width:'+(counts[i]/max*100)+'%"></i></div><div class="n">'+counts[i]+'</div></div>';
+  }).join("")+'</div>';
+  h+='<h2>Who lives here</h2><div class="card" style="padding:6px 14px 14px">'+membersEditor()+'<button class="btn" id="savemembers">Save people</button><div class="note" style="padding:8px 0 0">Tick "Kid" for jobs marked for kids/teens.</div></div>';
+  h+='<h2>Robot vacuum days</h2><div class="card"><div class="note" style="padding:12px 14px 4px">Tap the days it runs. Leave all off if you don\'t have one.</div>'+dayPicker()+'</div>';
+  h+='<h2>How often (days)</h2><div class="card"><div class="freqgrid">'+GROUP_ORDER.map(function(g){ return '<span>'+GLONG[g]+'</span><input type="number" inputmode="numeric" min="1" max="3650" data-freq="'+g+'" value="'+cfg.freq[g]+'">'; }).join("")+'</div><div style="padding:0 14px 14px"><button class="btn" id="savefreq">Save schedule</button></div></div>';
+  h+='<h2>Your data</h2><div class="card note">Everything is saved only on this phone, in this browser. Nothing is sent anywhere.'+
+     '<button class="btn" id="export" style="margin-top:10px">⬇ Download Excel file</button>'+
+     '<div class="row2"><button class="btn ghost" id="backup">Save backup</button><button class="btn ghost" id="restorebk">Restore backup</button></div>'+
+     '<div style="margin-top:8px">Use a backup to move your list to a new phone. Each phone keeps its own list — share one phone\'s backup with the family to start everyone the same.</div></div>';
+  if(cfg.removed.length) h+='<button class="btn ghost" id="restore" style="margin-top:14px">Restore '+cfg.removed.length+' hidden job'+(cfg.removed.length>1?"s":"")+'</button>';
+  h+='<button class="btn ghost" id="showinstall" style="margin-top:10px">How to add to home screen</button>';
+  h+='<button class="btn warn" id="reset" style="margin-top:10px">Start over (erase everything)</button>';
+  h+='<div class="status">Home Care · general guidance only — check local rules and use licensed trades for electrical, gas and structural work.</div>';
+  return h;
+}
+
+var renderQueued=false, renderBlocked=false;
+function scheduleRender(){ if(renderQueued) return; renderQueued=true; requestAnimationFrame(function(){ renderQueued=false; render(); }); }
+function render(){
+  var ae=document.activeElement;
+  if(ae && $("app").contains(ae) && /INPUT|SELECT|TEXTAREA/.test(ae.tagName) && ae.id!=="search" && ae.type!=="checkbox"){ renderBlocked=true; return; }
+  renderBlocked=false;
+  var r=route(), sy=window.scrollY, sEl=$("search"), sq=sEl?sEl.value:"", sf=sEl&&ae===sEl;
+  $("app").innerHTML = r==="mine"?viewMine():r==="all"?viewAll():r==="settings"?viewSettings():viewToday();
+  window.scrollTo(0,sy);
+  var s2=$("search"); if(s2&&sq){ s2.value=sq; filterSearch(sq.trim().toLowerCase()); if(sf) s2.focus(); }
+  var over=allTasks().filter(function(t){return daysLeft(t)<0;}).length;
+  $("tabs").innerHTML=TABS.map(function(t){ return '<a href="#'+t[0]+'" class="'+(r===t[0]?"on":"")+'">'+t[2]+'<span>'+t[1]+((t[0]==="today"&&over)?'<span class="badge">'+over+'</span>':'')+'</span></a>'; }).join("");
+}
+document.addEventListener("focusout", function(){ setTimeout(function(){ if(renderBlocked) render(); },50); });
+
+/* ---------- sheets ---------- */
+function openSheet(html){ $("sheet").innerHTML='<div class="grab"></div>'+html; $("sheetbg").classList.add("show"); }
+function closeSheet(){ $("sheetbg").classList.remove("show"); }
+function setupSheet(){
+  openSheet('<h3>Welcome to Home Care 🏡</h3><div class="note" style="padding:0">A cleaning and maintenance plan for your home — weekly to yearly — that reschedules itself as you tick jobs off. First, who lives here?</div>'+
+    '<div style="margin-top:6px">'+membersEditor()+'</div>'+
+    '<div class="field"><label>Robot vacuum days (optional)</label></div>'+dayPicker().replace('class="daypick"','class="daypick" style="padding:0 0 4px"')+
+    '<button class="btn" id="finishsetup">Let\'s go</button>');
+}
+function readMembers(){
+  var rows=document.querySelectorAll("[data-mname]"), out=[];
+  rows.forEach(function(inp){ var i=+inp.dataset.mname, k=document.querySelector('[data-mkid="'+i+'"]'); out.push({n:inp.value.trim()||("Person "+(i+1)), kid:!!(k&&k.checked)}); });
+  return out.length?out:DATA.cfg.members;
+}
+function whoSheet(){
+  openSheet('<h3>Who\'s using this phone?</h3><div class="note" style="padding:0">Ticks are recorded under this name.</div><div class="pick">'+
+    DATA.cfg.members.map(function(m,i){ return '<button data-pickme="'+i+'"><span class="av" style="background:'+AVCOL[i%6]+'">'+esc(m.n[0].toUpperCase())+'</span>'+esc(m.n)+'</button>'; }).join("")+'</div>');
+}
+function taskSheet(id){
+  var t=findTask(id); if(!t) return;
+  var hist=rec(t).h.filter(function(e){return validDate(e.d);}), w=whoOf(t);
+  var opts=[["all","Anyone"],["adults","Adults"]].concat(kids().length>1?[["teen","Kids"]]:[]).concat(DATA.cfg.members.map(function(m,i){return ["p"+i,m.n];})).concat([["pro","Book a pro / tradie"]]);
+  if(!opts.some(function(o){return o[0]===w;})) opts.splice(2,0,[w,whoLabel(w)]);
+  var h='<span class="pill f-'+t.g+'">'+GLONG[t.g]+' · every '+freq(t)+' days</span> <span class="pill who">'+esc(t.area)+'</span><h3>'+esc(t.name)+'</h3>'+
+    '<div class="due '+status(t)+'" style="font-size:14px">'+dueText(t)+(Math.abs(daysLeft(t))<14?' · '+esc(nice(dueDate(t))):'')+'</div>'+(t.tip?'<div class="tip">'+esc(t.tip)+'</div>':'')+
+    '<button class="btn" data-sdone="'+esc(id)+'">✓ Done today'+(prefs.me!=null?' by '+esc(memberName(prefs.me)):'')+'</button>'+
+    '<div class="field"><label>Done on a different day?</label><div class="row2"><input type="date" id="otherdate" max="'+todayStr()+'" value="'+addDays(todayStr(),-1)+'"><button class="btn ghost" style="margin:0" data-odone="'+esc(id)+'">Save date</button></div></div>'+
+    '<div class="field"><label>Assigned to</label><select id="whosel">'+opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===w?" selected":"")+'>'+esc(o[1])+'</option>';}).join("")+'</select></div>';
+  if(hist.length) h+='<div class="field"><label>History</label><ul class="hist">'+hist.map(function(e){return '<li><b>'+esc(nice(e.d))+'</b><span>'+esc(e.by)+'</span></li>';}).join("")+'</ul></div>';
+  h+='<div class="row2">'+(hist.length?'<button class="btn ghost" data-undo="'+esc(id)+'">Remove last tick</button>':'')+'<button class="btn warn" data-hide="'+esc(id)+'"'+(hist.length?'':' style="grid-column:1/3"')+'>'+(t.custom?"Delete job":"Hide — not for us")+'</button></div><button class="btn ghost" data-close="1">Close</button>';
+  openSheet(h);
+  $("whosel").onchange=function(){ setWho(id,this.value); toast("Reassigned to "+whoLabel(this.value)); };
+}
+function addSheet(){
+  var g=GLABEL[prefs.filter]?prefs.filter:"w";
+  openSheet('<h3>Add your own job</h3><div class="field"><label>Job</label><input id="nname" placeholder="e.g. Clean the fish tank" maxlength="70"></div>'+
+    '<div class="row2"><div class="field"><label>How often</label><select id="ngroup">'+GROUP_ORDER.map(function(k){return '<option value="'+k+'"'+(k===g?" selected":"")+'>'+GLONG[k]+'</option>';}).join("")+'</select></div><div class="field"><label>Area</label><input id="narea" placeholder="e.g. Living" maxlength="20"></div></div>'+
+    '<div class="field"><label>First due</label><input id="nfirst" type="date" value="'+todayStr()+'"></div><div class="field"><label>Notes (optional)</label><input id="ntip" maxlength="200"></div>'+
+    '<button class="btn" id="nsave">Add job</button><button class="btn ghost" data-close="1">Cancel</button>');
+  $("nsave").onclick=function(){
+    var n=$("nname").value.trim(); if(!n){ $("nname").focus(); return; } var fd=$("nfirst").value;
+    DATA.cfg.custom.push({id:"c-"+Date.now().toString(36), g:$("ngroup").value, area:$("narea").value.trim()||"Other", name:n, tip:$("ntip").value.trim(), first:validDate(fd)?fd:todayStr()});
+    save(); closeSheet(); render(); toast("Job added");
+  };
+}
+function installSheet(){
+  openSheet('<h3>Add to your home screen</h3><div class="tip"><b>iPhone</b><br>1. Open this page in <b>Safari</b>.<br>2. Tap <b>Share</b> (square with an arrow).<br>3. Tap <b>Add to Home Screen</b>, then <b>Add</b>.</div>'+
+    '<div class="tip"><b>Android</b><br>1. Open this page in <b>Chrome</b>.<br>2. Tap <b>⋮</b> at the top right.<br>3. Tap <b>Install app</b> or <b>Add to Home screen</b>.</div><div class="note" style="padding:0">Once installed it opens full-screen and works without internet.</div><button class="btn ghost" data-close="1">Got it</button>');
+}
+function confirmSheet(msg, okLabel, fn){
+  openSheet('<h3>'+esc(msg)+'</h3><button class="btn warn" id="confirmok">'+esc(okLabel)+'</button><button class="btn ghost" data-close="1">Cancel</button>');
+  $("confirmok").onclick=function(){ closeSheet(); fn(); };
+}
+var toastT=null;
+function toast(msg, actLabel, act){
+  var el=$("toast"); el.innerHTML='<span>'+esc(msg)+'</span>'+(actLabel?'<button id="toastact">'+esc(actLabel)+'</button>':'');
+  el.classList.add("show"); clearTimeout(toastT);
+  if(actLabel) $("toastact").onclick=function(){ el.classList.remove("show"); act(); };
+  toastT=setTimeout(function(){ el.classList.remove("show"); }, actLabel?5500:2200);
+}
+
+/* ---------- files ---------- */
+function downloadBlob(blob, name){
+  var url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+}
+function loadXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise(function(res,rej){ var s=document.createElement("script"); s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload=function(){res(window.XLSX);}; s.onerror=rej; document.head.appendChild(s); });
+}
+function exportExcel(){
+  toast("Preparing Excel file…");
+  var t=todayStr(), stL={over:"Overdue",soon:"Due soon",ok:"OK"};
+  var rows=[["Frequency","Every (days)","Area","Job","Assigned to","Last done","Done by","Next due","Days left","Status","How-to tips"]];
+  allTasks().sort(function(a,b){ return GROUP_ORDER.indexOf(a.g)-GROUP_ORDER.indexOf(b.g) || (a.area<b.area?-1:a.area>b.area?1:0) || sortByDue(a,b); }).forEach(function(x){
+    var ld=lastDone(x); rows.push([GLONG[x.g],freq(x),x.area,x.name,whoLabel(whoOf(x)),ld?parse(ld.d):"",ld?ld.by:"",parse(dueDate(x)),daysLeft(x),stL[status(x)],x.tip]);
+  });
+  loadXLSX().then(function(X){
+    var ws=X.utils.aoa_to_sheet(rows,{cellDates:true});
+    ws["!cols"]=[{wch:18},{wch:10},{wch:12},{wch:44},{wch:14},{wch:12},{wch:10},{wch:12},{wch:9},{wch:10},{wch:80}];
+    ws["!autofilter"]={ref:"A1:K"+rows.length};
+    for(var r=2;r<=rows.length;r++){ ["F","H"].forEach(function(c){ var cell=ws[c+r]; if(cell&&cell.t==="d") cell.z="d mmm yyyy"; }); }
+    var wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,"Jobs");
+    downloadBlob(new Blob([X.write(wb,{bookType:"xlsx",type:"array",cellDates:true})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}), "Home Care Jobs "+t+".xlsx");
+  }, function(){
+    var csv=rows.map(function(r){ return r.map(function(v){ if(v instanceof Date) v=ymd(v); v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(","); }).join("\n");
+    downloadBlob(new Blob(["﻿"+csv],{type:"text/csv"}), "Home Care Jobs "+t+".csv");
+    toast("Offline — saved as CSV (opens in Excel)");
+  });
+}
+function backup(){ downloadBlob(new Blob([JSON.stringify({app:"home-care",version:1,saved:new Date().toISOString(),data:DATA},null,1)],{type:"application/json"}), "home-care-backup-"+todayStr()+".json"); }
+$("importfile").addEventListener("change", function(){
+  var f=this.files && this.files[0]; if(!f) return; var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var j=JSON.parse(rd.result), d=j && j.data; if(!d || typeof d!=="object" || !d.cfg) throw 0;
+      confirmSheet("Replace this phone's list with the backup?","Restore backup",function(){
+        DATA={done:(d.done&&typeof d.done==="object")?d.done:{}, cfg:normCfg(d.cfg), robot:d.robot||{}}; DATA.cfg.setup=true; save(); prefs.me=null; savePrefs(); render(); toast("Backup restored"); setTimeout(whoSheet,300);
+      });
+    }catch(e){ toast("That file isn't a Home Care backup."); }
+  };
+  rd.readAsText(f); this.value="";
+});
+
+/* ---------- events ---------- */
+document.addEventListener("click", function(e){
+  if(e.target===$("sheetbg")){ if(DATA.cfg.setup) closeSheet(); return; }
+  var el=e.target.closest("[data-done],[data-open],[data-filter],[data-sdone],[data-odone],[data-undo],[data-hide],[data-close],[data-pickme],[data-hideinstall],[data-rday],[data-mrm],button[id]");
+  if(!el) return; var d=el.dataset;
+  if(d.done){ e.stopPropagation(); if(prefs.me==null){ whoSheet(); return; } el.classList.add("justdone"); setTimeout(function(){ markDone(d.done); },180); return; }
+  if(d.sdone){ if(prefs.me==null){ whoSheet(); return; } closeSheet(); markDone(d.sdone); return; }
+  if(d.odone){ var v=$("otherdate").value; if(!validDate(v)||v>todayStr()){ toast("Pick a date up to today"); return; } if(prefs.me==null){ whoSheet(); return; } closeSheet(); markDone(d.odone,v); return; }
+  if(d.undo){ var r=DATA.done[d.undo]; if(r&&r.h&&r.h.length){ var top=r.h.slice().sort(function(a,b){return a.d<b.d?1:-1;})[0]; undoEntry({id:d.undo,entry:top}); } closeSheet(); return; }
+  if(d.hide){ var id=d.hide; if(id.indexOf("c-")===0) DATA.cfg.custom=DATA.cfg.custom.filter(function(c){return c.id!==id;}); else DATA.cfg.removed.push(id); save(); closeSheet(); render(); toast("Job removed"); return; }
+  if(d.close){ closeSheet(); return; }
+  if(d.pickme!=null){ prefs.me=+d.pickme; savePrefs(); closeSheet(); render(); toast("Hi "+memberName(prefs.me)+"!"); return; }
+  if(d.hideinstall){ prefs.hideInstall=true; savePrefs(); render(); return; }
+  if(d.rday!=null){ var dd=+d.rday, rd=DATA.cfg.robotDays, i=rd.indexOf(dd); if(i>=0) rd.splice(i,1); else rd.push(dd); save(); el.classList.toggle("on"); if(!$("sheetbg").classList.contains("show")) render(); return; }
+  if(d.mrm!=null){ var mem=readMembers(); mem.splice(+d.mrm,1); DATA.cfg.members=mem; if(prefs.me!=null&&prefs.me>=mem.length){ prefs.me=null; savePrefs(); } save(); if($("sheetbg").classList.contains("show")) setupSheet(); else { document.activeElement&&document.activeElement.blur(); render(); } return; }
+  if(d.open){ taskSheet(d.open); return; }
+  if(d.filter){ prefs.filter=d.filter; savePrefs(); render(); return; }
+  switch(el.id){
+    case "whoami": whoSheet(); return;
+    case "addbtn": addSheet(); return;
+    case "showinstall": installSheet(); return;
+    case "installnow": if(deferredInstall){ deferredInstall.prompt(); deferredInstall.userChoice.finally(function(){ deferredInstall=null; render(); }); } return;
+    case "export": exportExcel(); return;
+    case "backup": backup(); return;
+    case "restorebk": $("importfile").click(); return;
+    case "restore": DATA.cfg.removed=[]; save(); render(); toast("Jobs restored"); return;
+    case "addmember": var m=readMembers(); if(m.length<6) m.push({n:"Person "+(m.length+1),kid:false}); DATA.cfg.members=m; save(); if($("sheetbg").classList.contains("show")) setupSheet(); else { document.activeElement&&document.activeElement.blur(); render(); } return;
+    case "savemembers": DATA.cfg.members=readMembers(); save(); document.activeElement&&document.activeElement.blur(); render(); toast("Saved"); return;
+    case "finishsetup": DATA.cfg.members=readMembers(); DATA.cfg.setup=true; DATA.cfg.start=todayStr(); save(); closeSheet(); render(); setTimeout(whoSheet,250); return;
+    case "savefreq": var bad=false; document.querySelectorAll("[data-freq]").forEach(function(inp){ var n=Math.round(+inp.value); if(n>=1&&n<=3650) DATA.cfg.freq[inp.dataset.freq]=n; else bad=true; }); save(); document.activeElement&&document.activeElement.blur(); render(); toast(bad?"Saved (ignored invalid numbers)":"Schedule saved"); return;
+    case "reset": confirmSheet("Erase all jobs history and settings on this phone?","Erase everything",function(){ try{ localStorage.removeItem(KEY); localStorage.removeItem(PKEY); }catch(e){} location.hash=""; location.reload(); }); return;
+  }
+});
+document.addEventListener("change", function(e){ if(e.target.dataset && e.target.dataset.robot) toggleRobot(e.target.dataset.robot); });
+document.addEventListener("input", function(e){
+  if(e.target.id!=="search") return; var q=e.target.value.trim().toLowerCase();
+  if(q && prefs.filter!=="all"){ prefs.filter="all"; savePrefs(); render(); return; }
+  filterSearch(q);
+});
+function filterSearch(q){
+  var any=false;
+  document.querySelectorAll("#app .task").forEach(function(r){ var m=!q||r.dataset.name.indexOf(q)>=0; r.style.display=m?"":"none"; if(m) any=true; });
+  document.querySelectorAll("#app .area").forEach(function(a){ var l=a.nextElementSibling; a.style.display=(l&&Array.prototype.some.call(l.children,function(c){return c.style.display!=="none";}))?"":"none"; });
+  var nr=$("nores"); if(nr) nr.style.display=any?"none":"";
+}
+window.addEventListener("hashchange", function(){ render(); window.scrollTo(0,0); });
+document.addEventListener("visibilitychange", function(){ if(!document.hidden) scheduleRender(); });
+window.addEventListener("storage", function(e){ if(e.key===KEY){ load(); scheduleRender(); } });
+
+render();
+if(!DATA.cfg.setup) setTimeout(setupSheet, 300);
+else if(prefs.me==null) setTimeout(whoSheet, 300);
+if("serviceWorker" in navigator && location.protocol==="https:"){ window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+})();
+</script>
+</body>
+</html>
